@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<title>The Wall - Python </title>
+	</head>
+	<body>
+		<!-- Leave this session check here; if user session data show it means that the session has not cleared successfully! -->
+		{{session['id']}}
+
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				{% for message in messages %}
+					<p>{{message}}</p> 
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+
+		<h1>Login</h1>
+		<form action='/login' method='POST'>
+			Email: <input type='text' name='email'><br>
+			Password: <input type='password' name='password'><br>
+			<input type='submit' value='Login'>
+		</form>
+
+		<h1>Register</h1> 
+		<form action='/register' method='POST'>
+			First Name: <input type='text' name='first_name'><br>
+			Last Name: <input type='text' name='last_name'><br>
+			Email: <input type='text' name='email'><br>
+			Password: <input type='password' name='password'><br>
+			Password Confirmation: <input type='password' name='password_confirmation'><br>
+			<input type='submit' value='Register'>
+		</form>
+	</body>
+</html>

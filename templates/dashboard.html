@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<title>The Wall - Python </title>
+	</head>
+	<body>
+	<div id='header'> 
+		Hello {{user[0]['first_name']}}! 
+		<a href="/logout">Logout</a><hr>
+	</div>
+	<div id='content'> 
+		<h4>Post a Message!</h4>
+		<form action='/post_message' method='POST'>
+			<input type='text' name='message'><br>
+			<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
+			<input type='submit' value='Post'> 
+		</form> 
+	</div> 
+	<div id='posted_messages'> 
+		{% for message in messages: %}
+   			<p>{{message['first_name']}} {{message['last_name']}} --- {{message['posted_date']}}</p>
+   			<p>{{message['message']}}</p> 
+
+   				{% for comment in comments: %}
+   					{% if message['message_id'] == comment['message_id']: %}
+   						{{comment['comment']}} -- {{comment['first_name']}} {{comment['last_name']}}, {{comment['comment_date']}} <br>
+   					{% endif %}
+   				{% endfor %}
+
+   			<h6>Post Comment</h6> 
+   			<form action='/post_comment' method='POST'> 
+   				<input type='text' name='comment'><br>
+   				<input type='hidden' name='message_id' value='{{message['message_id']}}'>
+   				<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
+   				<input type='submit' value='Comment'> 
+   			</form> 
+
+
+   			<hr>
+		{% endfor %}
+	</div> 
+	</body>
+</html>
