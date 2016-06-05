@@ -85,7 +85,7 @@ def dashboard():
 	}
 	user = mysql.query_db(query, data)
 	# THIS query joins Messages & Users table, and pulls out data I will display on dashboard, and order by newest posts first
-	mquery = "SELECT first_name, last_name, users.id AS user_id, message, messages.created_at AS posted_date, messages.id AS message_id, messages.user_id AS mu_id FROM users LEFT JOIN messages ON users.id = messages.user_id ORDER BY posted_date DESC"
+	mquery = "SELECT first_name, last_name, users.id AS user_id, message, messages.created_at AS posted_date, messages.id AS message_id, messages.user_id AS mu_id FROM users JOIN messages ON users.id = messages.user_id ORDER BY posted_date DESC"
 	messages = mysql.query_db(mquery)
 
 	# THIS query joins messages, users, & comments table to display comments associated with messags, and order by newest comments first
@@ -113,6 +113,23 @@ def message():
 	mysql.query_db(query, data)
 	# once the post has been added, refresh back to dashboard
 	return redirect('/dashboard')
+
+#Action to delete post from database
+@app.route('/delete_message', methods=['POST'])
+def delete():
+	cquery = "DELETE FROM comments WHERE message_id = :id"
+	cdata = {
+		'id': request.form['message_id']
+	}
+	mysql.query_db(cquery, cdata)
+
+	query = "DELETE FROM messages WHERE user_id = :id"
+	data = {
+		'id': request.form['user_id']
+	}
+	mysql.query_db(query, data)
+	return redirect('/dashboard')
+
 
 # Action to add comments to messages in DB
 @app.route('/post_comment', methods=['POST'])
