@@ -1,0 +1,45 @@
+#container{
+	font-family: "Arial";
+}
+
+h1{
+	color: green;
+}
+
+
+input[name="message"]{
+	width: 50%;
+	text-overflow: ellipsis;
+	overflow: auto;
+	border: 2px solid black;
+	font-size: 14px;
+	padding: 5px;
+}
+
+input[name="update_message"]{
+	background-color: green;
+	color: white;
+	font-size: 13px;
+	border-radius: 10px;
+	border: 2px solid black;
+	margin-top: 5px;
+	padding-left: 5px;
+}
+
+a[name="back"]{
+	background-color: green;
+	text-decoration: none;
+	border: 2px solid black;
+	border-radius: 10px;
+	padding: 5px;
+	color: white;
+}
+
+input[name="delete_mine"]{
+	background-color: red;
+	border: 2px solid black;
+	border-radius: 10px;
+	padding: 5px;
+	color: white;
+}
+

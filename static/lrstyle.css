@@ -1,0 +1,22 @@
+#container{
+	font-family: "Arial";
+}
+
+h1{
+	color: green;
+}
+
+.box{
+	border: 2px solid green;
+	width: 300px;
+	height: 250px;
+	display: inline-block;
+	vertical-align: top;
+	text-align: center;
+	border-radius: 20px;
+}
+
+#message{
+	color: green;
+	font-size: 24px;
+}

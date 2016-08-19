@@ -1,56 +1,95 @@
 <html>
 	<head>
 		<title>The Wall - Python </title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 	</head>
 	<body>
-	<div id='header'> 
-		Hello {{user[0]['first_name']}}! 
-		<a href="/logout">Logout</a><hr>
-	</div>
-	<div id='content'> 
+	<div id="container">
+		<div id='header'> 
+			<h3>Welcome {{user[0]['first_name']}}!</h3>
+			<a name="log" href="/logout">Logout</a><hr>
+		</div>
 		<h4>Post a Message!</h4>
 		<form action='/post_message' method='POST'>
 			<input type='text' name='message'><br>
 			<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
-			<input type='submit' value='Post'> 
+			<input type='submit' name='post_button' value='Post It!'> 
 		</form> 
-	</div> 
-	<div id='posted_messages'> 
 		{% if messages is defined: %}
 			{% for message in messages: %}
-	   			{% if message['mu_id'] == user[0]['id']: %}
-	   				<form action='/delete_message' method='POST'>
-	   					<input type='hidden' value='{{user[0]['id']}}' name='user_id'>
-	   					<input type='hidden' value='{{message['message_id']}}' name='message_id'>
-	   					<input type='submit' value='Delete'>
-	   				</form>
-	   			{% endif %}
+				<div id="each">
+	   				{% if message['mu_id'] == user[0]['id']: %}
+	   					<a name="edit" href="/edit/{{message['message_id']}}">Edit My Post</a>
+	   				{% endif %}
 	   
+	   				<div class="message_info">
+	   					<p>Posted by: <b>{{message['first_name']}}</b> on {{message['posted_date'].strftime("%A %B %d, %H:%M")}}</p>
+	   					{% if message['updated_date'] != None: %}
 
-	   			<p>{{message['first_name']}} {{message['last_name']}} --- {{message['posted_date']}}</p>
-	   			<p>{{message['message']}}</p> 
+	   					Updated on: {{message['updated_date']}}
+	   					{% endif %}
+	   					
+	   				</div>
+	   				<h2>{{message['message']}}</h2> 
+	   				<hr>
 
 
-	   				{% for comment in comments: %}
-	   					{% if message['message_id'] == comment['message_id']: %}
-	   						{{comment['comment']}} -- {{comment['first_name']}} {{comment['last_name']}}, {{comment['comment_date']}} <br>
+
+
+	   				{% for co in co: %}
+	   					{% if co['co_message_id'] == message['message_id']: %}
+	   							<h6>Likes: {{co['counter']}}</h6>
+	   						{% if co['co_user_id'] == user[0]['id']: %}
+	   							USER LIKED
+	   							{% else: %}
+	   								<form action='/like' method='POST'> 
+	   									<input type='hidden' name='message_id' value='{{message['message_id']}}'>
+	   									<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
+	   									<input type='submit' name='like_button' value='Like'> 
+	   								</form> 
+
+	   						{% endif %}
+	   						{% else: %}
+	   							0 LIKES
 	   					{% endif %}
 
 	   				{% endfor %}
+	   					
 
 
-	   			<h6>Post Comment</h6> 
-	   			<form action='/post_comment' method='POST'> 
-	   				<input type='text' name='comment'><br>
-	   				<input type='hidden' name='message_id' value='{{message['message_id']}}'>
-	   				<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
-	   				<input type='submit' value='Comment'> 
-	   			</form> 
+	   					
+	   				<div id="comments">
+	   					{% for comment in comments: %}
+	   						{% if message['message_id'] == comment['message_id']: %}
+	   							<p>{{comment['comment']}}</p>
 
-	   			<hr>
+	   							<p>{{comment['comment_update']}}</p>
+	   							<div class="message_info">
+	   								<b>{{comment['first_name']}} </b>commented on {{comment['comment_date'].strftime("%A %B %d, %H:%M")}} <br>
+	   								{% if comment['comment_update'] != None: %}
+	   									Updated on: {{comment['comment_update']}}
+	   								{% endif %}
+	   							</div>
+	   							<br>
+	   							{% if comment['user_id'] == user[0]['id']: %}
+	   								<a name="edit_comment" href="/edit_comment/{{comment['comment_id']}}">Edit My Comment</a>
+	   							{% endif %}
+	   						{% endif %}
+	   					{% endfor %}
+	   				</div>
 
+	   				<h5>Post a Comment</h5>
+	   				<form action='/post_comment' method='POST'> 
+	   					<input type='text' name='comment'><br>
+	   					<input type='hidden' name='message_id' value='{{message['message_id']}}'>
+	   					<input type='hidden' name='user_id' value='{{user[0]['id']}}'> 
+	   					<input type='submit' name='comment_button' value='Comment'> 
+	   				</form> 
+	   			
+	   			</div>
 			{% endfor %}
 		{% endif %}
-	</div> 
+	</div>
 	</body>
 </html>

@@ -85,14 +85,22 @@ def dashboard():
 	}
 	user = mysql.query_db(query, data)
 	# THIS query joins Messages & Users table, and pulls out data I will display on dashboard, and order by newest posts first
-	mquery = "SELECT first_name, last_name, users.id AS user_id, message, messages.created_at AS posted_date, messages.id AS message_id, messages.user_id AS mu_id FROM users JOIN messages ON users.id = messages.user_id ORDER BY posted_date DESC"
+	mquery = "SELECT first_name, last_name, users.id AS user_id, message, messages.created_at AS posted_date, messages.updated_at AS updated_date, messages.id AS message_id, messages.user_id AS mu_id FROM users JOIN messages ON users.id = messages.user_id ORDER BY posted_date DESC"
 	messages = mysql.query_db(mquery)
 
-	# THIS query joins messages, users, & comments table to display comments associated with messags, and order by newest comments first
-	cquery = "SELECT first_name, last_name, messages.id AS message_id, comment, comments.created_at as comment_date FROM comments LEFT JOIN messages on comments.message_ID = messages.id LEFT JOIN users on comments.user_id = users.id ORDER BY comment_date DESC"
+	# THIS query joins messages, users, & comments table to display comments associated with messags, and order by oldest comments first
+	cquery = "SELECT first_name, last_name, messages.id AS message_id, comment, comments.created_at as comment_date, comments.updated_at as comment_update, comments.user_id as user_id, comments.id AS comment_id FROM comments LEFT JOIN messages on comments.message_ID = messages.id LEFT JOIN users on comments.user_id = users.id ORDER BY comment_date ASC"
 	comments = mysql.query_db(cquery) 
 
-	return render_template('dashboard.html', user=user, messages = messages, comments = comments)
+	lquery = "SELECT first_name, message, users.id AS user_id, messages.id AS message_id FROM likes LEFT JOIN users on likes.user_id = users.id LEFT JOIN messages on likes.message_id = messages.id"
+	likes = mysql.query_db(lquery)
+
+	coquery = "SELECT messages.id AS co_message_id, users.id AS co_user_id, COUNT(*) as counter FROM likes LEFT JOIN messages on likes.message_id = messages.id LEFT JOIN users on likes.user_id = users.id GROUP BY co_message_id"
+	co = mysql.query_db(coquery)
+
+
+
+	return render_template('dashboard.html', user=user, messages = messages, comments = comments, likes=likes, co=co)
 
 # Action to Logout User (clear session)
 @app.route('/logout')
@@ -105,7 +113,7 @@ def logout():
 def message(): 
 	message = request.form['message']
 	user_id = request.form['user_id']
-	query = "INSERT INTO messages (message, created_at, updated_at, user_id) VALUES (:message, NOW(), NOW(), :user_id)" 
+	query = "INSERT INTO messages (message, created_at, user_id) VALUES (:message, NOW(), :user_id)" 
 	data = {
 		'message': message, 
 		'user_id': user_id
@@ -117,9 +125,9 @@ def message():
 #Action to delete post from database
 @app.route('/delete_message', methods=['POST'])
 def delete():
-	cquery = "DELETE FROM comments WHERE message_id = :id"
+	cquery = "DELETE FROM comments WHERE message_id = :m_id"
 	cdata = {
-		'id': request.form['message_id']
+		'm_id': request.form['message_id']
 	}
 	mysql.query_db(cquery, cdata)
 
@@ -130,6 +138,16 @@ def delete():
 	mysql.query_db(query, data)
 	return redirect('/dashboard')
 
+#Action to delete comment from databse
+@app.route('/delete_comment', methods=['POST'])
+def delete_comment():
+	cquery = "DELETE FROM comments WHERE comments.id = :id"
+	cdata = {
+		'id': request.form['comment_id']
+	}
+	mysql.query_db(cquery, cdata)
+	return redirect('/dashboard')
+
 
 # Action to add comments to messages in DB
 @app.route('/post_comment', methods=['POST'])
@@ -137,7 +155,7 @@ def comment():
 	comment = request.form['comment']
 	user_id = request.form['user_id']
 	message_id = request.form['message_id']
-	query = "INSERT INTO comments (comment, created_at, updated_at, message_id, user_id) VALUES (:comment, NOW(), NOW(), :message_id, :user_id)"
+	query = "INSERT INTO comments (comment, created_at, message_id, user_id) VALUES (:comment, NOW(), :message_id, :user_id)"
 	data = {
 		'comment': comment, 
 		'message_id': message_id,
@@ -145,6 +163,70 @@ def comment():
 	}
 	mysql.query_db(query, data)
 	# once the comment has been added to message, refresh dashboard
+	return redirect('/dashboard')
+
+# Action to 'LIKE' a post
+@app.route('/like', methods=['POST'])
+def like():
+	user_id = request.form['user_id']
+	message_id = request.form['message_id']
+	query = "INSERT INTO likes (user_id, message_id) VALUES (:user_id, :message_id)"
+	data = {
+		'user_id': user_id,
+		'message_id': message_id,
+	}
+	mysql.query_db(query, data)
+	return redirect('/dashboard')
+
+@app.route('/edit/<id>', methods=['GET'])
+def edit(id):
+	# THIS query sets session for user logging in
+	query = "SELECT * FROM users WHERE id = :id LIMIT 1"
+	data = {
+		'id': session['id']
+	}
+	user = mysql.query_db(query, data)
+	
+	mquery = "SELECT * FROM messages WHERE messages.id = :id"
+	mdata = {
+		'id': id, 
+	}
+	message = mysql.query_db(mquery, mdata)
+	return render_template('edit.html', message = message, user=user)
+
+@app.route('/edit_comment/<id>', methods=['GET'])
+def editcomment(id):
+	cquery = "SELECT * FROM comments WHERE comments.id = :id"
+	cdata = {
+		'id': id, 
+	}
+	comment = mysql.query_db(cquery, cdata)
+	return render_template('editc.html', comment = comment)
+
+@app.route('/update', methods=['POST'])
+def update():
+
+	message = request.form['message']
+	message_id = request.form['message_id']
+	query = "UPDATE messages SET message = :message, updated_at = NOW() WHERE messages.id = :message_id"	
+	data = {
+		'message': message,
+		'message_id': message_id,
+	}
+
+	mysql.query_db(query, data)
+	return redirect('/dashboard')
+
+@app.route('/update_comment', methods=['POST'])
+def updatec():
+	comment = request.form['message']
+	comment_id = request.form['comment_id']
+	query = "UPDATE comments SET comment = :comment, updated_at = NOW() WHERE comments.id = :comment_id"
+	data = {
+		'comment': comment,
+		'comment_id': comment_id,
+	}
+	mysql.query_db(query, data)
 	return redirect('/dashboard')
 
 

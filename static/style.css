@@ -1,0 +1,113 @@
+h4{
+	color: blue;
+}
+
+h3{
+	color: green;
+}
+
+#container{
+	font-family: "Arial";
+}
+
+/* Logout Button */
+a[name="log"]{
+	background-color: green;
+	border: 2px solid black;
+	border-radius: 10px;
+	padding: 5px;
+	text-decoration: none;
+	font-weight: bold;
+	color: white;
+}
+
+
+#each{
+	border: 2px solid green;
+	border-radius: 20px;
+	width: 300px;
+	height: 300px;
+	overflow: auto;
+	display: inline-block;
+	vertical-align: top;
+	padding: 15px;
+}
+
+/* Post Message Input Box */
+input[name=message]{
+	width: 300px;
+	padding: 12px 20px;
+	font-size: 15px;
+	border: 2px solid black;
+}
+
+input[name=message]:focus{
+	border: 4px solid green;
+}
+
+input[name=comment]{
+	width: 200px;
+	padding: 12px 20px;
+	font-size: 13px;
+	border: 2px solid black;
+}
+
+input[name=comment]:focus{
+	border: 4px solid green;
+}
+
+
+input[name=post_button]{
+	background-color: green;
+	color: white;
+	font-size: 16px;
+	border-radius: 10px;
+	border: 2px solid black;
+	margin-top: 10px;
+	margin-left: 200px;
+}
+
+input[name=comment_button]{
+	background-color: green;
+	color: white;
+	font-size: 13px;
+	border-radius: 10px;
+	border: 2px solid black;
+	margin-top: 5px;
+	margin-left: 100px;
+}
+
+a[name="edit"]{
+	background-color: green;
+	color: white;
+	font-size: 10px;
+	border-radius: 10px;
+	border: 2px solid black;
+	text-decoration: none;
+	padding: 5px;
+}
+
+a[name="edit_comment"]{
+	background-color: green;
+	font-size: 10px;
+	color: white;
+	border-radius: 10px;
+	border: 2px solid black;
+	text-decoration: none;
+	padding: 5px;
+}
+
+
+.message_info{
+	font-size: 11px;
+}
+
+#comments{
+	margin-left: 20px;
+}
+
+
+
+
+
+
