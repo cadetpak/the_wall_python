@@ -12,12 +12,12 @@ app.secret_key = "lkjf83kd"
 mysql = MySQLConnector(app, 'wall')
 
 
-# Root page, which will display login/registration forms
+# DISPLAY ROOT PAGE, which will display login/registration forms
 @app.route('/')
 def index(): 
 	return render_template('index.html')
 
-# Action to register - validates user input
+# REGISTER USER - validates user input
 @app.route('/register', methods=['POST'])
 def validate(): 
 	first_name = request.form['first_name']
@@ -53,7 +53,7 @@ def validate():
 	# whether successful or not, redirect back to main page!
 	return redirect('/')
 
-# Action to login - validates user input to db
+# LOGIN USER - validates user input to db
 @app.route('/login', methods=['POST'])
 def login(): 
 	email = request.form['email']
@@ -75,7 +75,13 @@ def login():
 		flash('Email/Password do not match! Try again!')
 		return redirect('/')
 
-# Action to load User's unique dashboard 
+# LOGOUT USER (clear session)
+@app.route('/logout')
+def logout(): 
+	session.clear()
+	return redirect('/')
+
+# DISPLAY USER DASHBOARD
 @app.route('/dashboard', methods=['GET'])
 def dashboard(): 
 	# THIS query sets session for user logging in
@@ -84,31 +90,19 @@ def dashboard():
 		'id': session['id']
 	}
 	user = mysql.query_db(query, data)
-	# THIS query joins Messages & Users table, and pulls out data I will display on dashboard, and order by newest posts first
+	# Joins Messages & Users table = Work with MESSAGES
+	# Order by newest posts first
 	mquery = "SELECT first_name, last_name, users.id AS user_id, message, messages.created_at AS posted_date, messages.updated_at AS updated_date, messages.id AS message_id, messages.user_id AS mu_id FROM users JOIN messages ON users.id = messages.user_id ORDER BY posted_date DESC"
 	messages = mysql.query_db(mquery)
 
-	# THIS query joins messages, users, & comments table to display comments associated with messags, and order by oldest comments first
+	# Joins Messages, Users, & Comments table = Work with COMMENTS
+	# Order by oldest comments first 
 	cquery = "SELECT first_name, last_name, messages.id AS message_id, comment, comments.created_at as comment_date, comments.updated_at as comment_update, comments.user_id as user_id, comments.id AS comment_id FROM comments LEFT JOIN messages on comments.message_ID = messages.id LEFT JOIN users on comments.user_id = users.id ORDER BY comment_date ASC"
 	comments = mysql.query_db(cquery) 
 
-	lquery = "SELECT first_name, message, users.id AS user_id, messages.id AS message_id FROM likes LEFT JOIN users on likes.user_id = users.id LEFT JOIN messages on likes.message_id = messages.id"
-	likes = mysql.query_db(lquery)
+	return render_template('dashboard.html', user=user, messages = messages, comments = comments)
 
-	coquery = "SELECT messages.id AS co_message_id, users.id AS co_user_id, COUNT(*) as counter FROM likes LEFT JOIN messages on likes.message_id = messages.id LEFT JOIN users on likes.user_id = users.id GROUP BY co_message_id"
-	co = mysql.query_db(coquery)
-
-
-
-	return render_template('dashboard.html', user=user, messages = messages, comments = comments, likes=likes, co=co)
-
-# Action to Logout User (clear session)
-@app.route('/logout')
-def logout(): 
-	session.clear()
-	return redirect('/')
-
-# Action to add posted message to database
+# ADD MESSAGE
 @app.route('/post_message', methods=['POST'])
 def message(): 
 	message = request.form['message']
@@ -122,7 +116,7 @@ def message():
 	# once the post has been added, refresh back to dashboard
 	return redirect('/dashboard')
 
-#Action to delete post from database
+# DELETE MESSAGE
 @app.route('/delete_message', methods=['POST'])
 def delete():
 	cquery = "DELETE FROM comments WHERE message_id = :m_id"
@@ -138,18 +132,7 @@ def delete():
 	mysql.query_db(query, data)
 	return redirect('/dashboard')
 
-#Action to delete comment from databse
-@app.route('/delete_comment', methods=['POST'])
-def delete_comment():
-	cquery = "DELETE FROM comments WHERE comments.id = :id"
-	cdata = {
-		'id': request.form['comment_id']
-	}
-	mysql.query_db(cquery, cdata)
-	return redirect('/dashboard')
-
-
-# Action to add comments to messages in DB
+# ADD COMMENT
 @app.route('/post_comment', methods=['POST'])
 def comment():
 	comment = request.form['comment']
@@ -165,22 +148,19 @@ def comment():
 	# once the comment has been added to message, refresh dashboard
 	return redirect('/dashboard')
 
-# Action to 'LIKE' a post
-@app.route('/like', methods=['POST'])
-def like():
-	user_id = request.form['user_id']
-	message_id = request.form['message_id']
-	query = "INSERT INTO likes (user_id, message_id) VALUES (:user_id, :message_id)"
-	data = {
-		'user_id': user_id,
-		'message_id': message_id,
+# DELETE COMMENT
+@app.route('/delete_comment', methods=['POST'])
+def delete_comment():
+	cquery = "DELETE FROM comments WHERE comments.id = :id"
+	cdata = {
+		'id': request.form['comment_id']
 	}
-	mysql.query_db(query, data)
+	mysql.query_db(cquery, cdata)
 	return redirect('/dashboard')
 
+# DISPLAY EDIT MESSAGE PAGE
 @app.route('/edit/<id>', methods=['GET'])
 def edit(id):
-	# THIS query sets session for user logging in
 	query = "SELECT * FROM users WHERE id = :id LIMIT 1"
 	data = {
 		'id': session['id']
@@ -193,7 +173,21 @@ def edit(id):
 	}
 	message = mysql.query_db(mquery, mdata)
 	return render_template('edit.html', message = message, user=user)
+	
+# UPDATE MESSAGE
+@app.route('/update', methods=['POST'])
+def update():
+	message = request.form['message']
+	message_id = request.form['message_id']
+	query = "UPDATE messages SET message = :message, updated_at = NOW() WHERE messages.id = :message_id"	
+	data = {
+		'message': message,
+		'message_id': message_id,
+	}
+	mysql.query_db(query, data)
+	return redirect('/dashboard')
 
+# DISPLAY EDIT COMMENT PAGE
 @app.route('/edit_comment/<id>', methods=['GET'])
 def editcomment(id):
 	cquery = "SELECT * FROM comments WHERE comments.id = :id"
@@ -203,20 +197,7 @@ def editcomment(id):
 	comment = mysql.query_db(cquery, cdata)
 	return render_template('editc.html', comment = comment)
 
-@app.route('/update', methods=['POST'])
-def update():
-
-	message = request.form['message']
-	message_id = request.form['message_id']
-	query = "UPDATE messages SET message = :message, updated_at = NOW() WHERE messages.id = :message_id"	
-	data = {
-		'message': message,
-		'message_id': message_id,
-	}
-
-	mysql.query_db(query, data)
-	return redirect('/dashboard')
-
+# UPDATE COMMENT
 @app.route('/update_comment', methods=['POST'])
 def updatec():
 	comment = request.form['message']

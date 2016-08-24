@@ -4,26 +4,20 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
 </head>
 <body>
-<div id="container">
-<a name="back" href="/dashboard">Dashboard</a>
+	<div id="container">
+		<a name="back" href="/dashboard">Dashboard</a>
+		<h1> Edit My Post </h1>
+		<form action='/update' method='POST'>
+			<input type='hidden' value='{{message[0].id}}' name='message_id'>
+			<input type='text' name='message' value='{{message[0]['message']}}'><br>
+			<input type='submit' name='update_message' value='Edit'>
+		</form>
 
-<h1> Edit My Post </h1>
-<form action='/update' method='POST'>
-	<input type='hidden' value='{{message[0].id}}' name='message_id'>
-	<input type='text' name='message' value='{{message[0]['message']}}'><br>
-
-	<input type='submit' name='update_message' value='Edit'>
-</form>
-
-<h1>User Id {{user[0].id}}<h1>
-	<h2>Message id {{message[0].id}}</h2>
-<form action='/delete_message' method='POST'>
-	<input type='hidden' value='{{user[0].id}}' name='user_id'>
-	<input type='hidden' value='{{message[0].id}}' name='message_id'>
-	<input type='submit' name='delete_mine' value='Delete My Post'>
-</form>
-
-
-</div>
+		<form action='/delete_message' method='POST'>
+			<input type='hidden' value='{{user[0].id}}' name='user_id'>
+			<input type='hidden' value='{{message[0].id}}' name='message_id'>
+			<input type='submit' name='delete_mine' value='Delete My Post'>
+		</form>
+	</div>
 </body>
 </html>

@@ -1,30 +1,21 @@
 <html>
-<head>
-	<title>The Wall - Python</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
-</head>
-<body>
-
-
-<div id="container">
-<a name="back" href="/dashboard">Dashboard</a>
-
-<h1> Edit My Comment </h1>
-<h1>{{comment[0].id}} ID </h1>
-<form action='/update_comment' method='POST'>
-	<input type='hidden' value='{{comment[0].id}}' name='comment_id'>
-	<input type='text' name='message' value='{{comment[0]['comment']}}'><br>
-
-	<input type='submit' name='update_message' value='Edit'>
-</form>
-
-<form action='/delete_comment' method='POST'>
-	<input type='hidden' value='{{comment[0].id}}' name='comment_id'>
-	<input type='submit' name='delete_mine' value='Delete My Comment'>
-</form>
-
-
- HI
-</div>
-</body>
+	<head>
+		<title>The Wall - Python</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
+	</head>
+	<body>
+		<div id="container">
+			<a name="back" href="/dashboard">Dashboard</a>
+			<h1> Edit My Comment </h1>
+			<form action='/update_comment' method='POST'>
+				<input type='hidden' value='{{comment[0].id}}' name='comment_id'>
+				<input type='text' name='message' value='{{comment[0]['comment']}}'><br>
+				<input type='submit' name='update_message' value='Edit'>
+			</form>
+			<form action='/delete_comment' method='POST'>
+				<input type='hidden' value='{{comment[0].id}}' name='comment_id'>
+				<input type='submit' name='delete_mine' value='Delete My Comment'>
+			</form>
+		</div>
+	</body>
 </html>
